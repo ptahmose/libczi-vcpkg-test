@@ -10,13 +10,13 @@ set VCPKG_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake
 rem %VCPKG_ROOT%\vcpkg.exe install --triplet x64-windows-static --head
 
 rem === Create and enter build directory ===
-if not exist build mkdir build
-cd build
+if not exist build_static mkdir build_static
+cd build_static
 
 rem === Run CMake configure step ===
 
- cmake .. -DCMAKE_TOOLCHAIN_FILE=%VCPKG_TOOLCHAIN_FILE% -DCMAKE_BUILD_TYPE=Release
-rem cmake .. -DCMAKE_TOOLCHAIN_FILE=%VCPKG_TOOLCHAIN_FILE% -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-windows-static
+rem cmake .. -DCMAKE_TOOLCHAIN_FILE=%VCPKG_TOOLCHAIN_FILE% -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_TOOLCHAIN_FILE=%VCPKG_TOOLCHAIN_FILE% -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-windows-static 
 
 if errorlevel 1 (
     echo CMake configuration failed.

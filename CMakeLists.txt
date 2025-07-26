@@ -16,5 +16,16 @@ endif()
 #find_package(Eigen3 CONFIG REQUIRED)
 find_package(libCZI CONFIG REQUIRED)
 
+# Define a local alias to the correct variant of libCZI
+if(TARGET libczi::libCZI)
+    add_library(libczi::libCZI_selected ALIAS libczi::libCZI)
+elseif(TARGET libczi::libCZIStatic)
+    add_library(libczi::libCZI_selected ALIAS libczi::libCZIStatic)
+else()
+    message(FATAL_ERROR "No suitable libCZI target found (neither shared nor static).")
+endif()
+
 add_executable(libczi_test main.cpp)
-target_link_libraries(libczi_test PRIVATE libczi::libCZI)
+#target_link_libraries(libczi_test PRIVATE  libczi::libCZI)
+target_link_libraries(libczi_test PRIVATE  libczi::libCZI_selected)
+#target_link_libraries(libczi_test PRIVATE  libczi::libCZIStatic)
