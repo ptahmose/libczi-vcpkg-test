@@ -1,0 +1,59 @@
+# CMakeLists.txt
+
+# Specify minimum CMake version required. Vcpkg generally requires 3.14 or newer.
+cmake_minimum_required(VERSION 3.14)
+
+# Define your project
+project(simple CXX)
+
+# Set C++ standard (e.g., C++17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# --- Best Practice for Vcpkg Integration ---
+# 1. Toolchain File: The most robust way to integrate vcpkg.
+#    This tells CMake to use vcpkg to find libraries.
+#    You can pass this on the command line, in CMakePresets.json,
+#    or (less ideal for discoverability but fine for a quick test app)
+#    set it directly in CMakeLists.txt.
+#    If you set it here, it MUST be before the first `project()` call.
+#    Example (if you know the VCPKG_ROOT environment variable is set):
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    if(DEFINED ENV{VCPKG_ROOT})
+        set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE FILEPATH "Vcpkg toolchain file")
+    else()
+        message(FATAL_ERROR "VCPKG_ROOT environment variable not set. Please set it to your vcpkg installation path.")
+    endif()
+endif()
+# --- End Vcpkg Integration ---
+
+# Find your new port. The exact name depends on what your port exports.
+# Check the "usage" file for the exact `find_package` name.
+# For example, if your port is named 'mylibrary' and provides target `MyLibrary::MyLibrary`:
+find_package(libCZI CONFIG REQUIRED)
+# Define a local alias to the correct variant of libCZI
+# This allows you to use `libczi::libCZI_selected` in your target_link_libraries.
+if(TARGET libczi::libCZI)
+    add_library(libczi::libCZI_selected ALIAS libczi::libCZI)
+elseif(TARGET libczi::libCZIStatic)
+    add_library(libczi::libCZI_selected ALIAS libczi::libCZIStatic)
+else()
+    message(FATAL_ERROR "No suitable libCZI target found (neither shared nor static).")
+endif()
+
+# Add your executable
+add_executable(${PROJECT_NAME} main.cpp)
+
+# Link your executable against the library provided by your port
+# Use the target alias provided by `find_package`.
+target_link_libraries(${PROJECT_NAME} PRIVATE libczi::libCZI_selected)
+
+# (Optional) If your library is header-only and doesn't provide a target,
+# you might need to manually add include directories, though this is less common
+# with well-behaved vcpkg ports.
+# target_include_directories(${PROJECT_NAME} PRIVATE MyLibrary_INCLUDE_DIRS) # Example, if it exposes a variable
+
+# (Optional) Add tests using CTest
+# enable_testing()
+# add_test(NAME basic_test COMMAND ${PROJECT_NAME})

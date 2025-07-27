@@ -1,0 +1,8 @@
+{
+  "name": "libczi-test",
+  "version": "0.1.0",
+  "dependencies": [
+    "libczi",
+    "zstd"
+  ]
+}
