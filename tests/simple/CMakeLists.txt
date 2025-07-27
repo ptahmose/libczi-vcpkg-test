@@ -11,10 +11,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if (MSVC)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
-
 # --- Best Practice for Vcpkg Integration ---
 # 1. Toolchain File: The most robust way to integrate vcpkg.
 #    This tells CMake to use vcpkg to find libraries.
@@ -48,6 +44,9 @@ endif()
 
 # Add your executable
 add_executable(${PROJECT_NAME} main.cpp)
+if (MSVC)
+  set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
 
 # Link your executable against the library provided by your port
 # Use the target alias provided by `find_package`.
