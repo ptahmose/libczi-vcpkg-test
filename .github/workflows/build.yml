@@ -34,8 +34,6 @@ jobs:
           cd build
           cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release --target run
-          cd ..
-          rd /s /q build
 
       - name: Build test application (static lib)
         shell: bash
@@ -45,6 +43,7 @@ jobs:
           ./vcpkg install libczi:x64-windows-static
           popd
           cd tests/simple
+          rm -rf build
           mkdir build
           cd build
           cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-windows-static 

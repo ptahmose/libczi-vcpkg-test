@@ -3,6 +3,9 @@
 # Specify minimum CMake version required. Vcpkg generally requires 3.14 or newer.
 cmake_minimum_required(VERSION 3.14)
 
+cmake_policy(SET CMP0091 NEW) # enable new "MSVC runtime library selection" (https://cmake.org/cmake/help/latest/variable/CMAKE_MSVC_RUNTIME_LIBRARY.html)
+
+
 # Define your project
 project(simple CXX)
 
@@ -44,9 +47,9 @@ endif()
 
 # Add your executable
 add_executable(${PROJECT_NAME} main.cpp)
-if (MSVC)
-  set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 
 # Link your executable against the library provided by your port
 # Use the target alias provided by `find_package`.
