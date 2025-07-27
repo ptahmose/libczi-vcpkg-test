@@ -40,7 +40,7 @@ jobs:
       - name: Build test application (static lib)
         shell: bash
         run: |
-          pushd ../../vcpkg
+          pushd vcpkg
           ./vcpkg remove libczi --recurse
           ./vcpkg install libczi:x64-windows-static
           popd
