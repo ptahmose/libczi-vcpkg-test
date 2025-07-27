@@ -49,11 +49,8 @@ add_executable(${PROJECT_NAME} main.cpp)
 # Use the target alias provided by `find_package`.
 target_link_libraries(${PROJECT_NAME} PRIVATE libczi::libCZI_selected)
 
-# (Optional) If your library is header-only and doesn't provide a target,
-# you might need to manually add include directories, though this is less common
-# with well-behaved vcpkg ports.
-# target_include_directories(${PROJECT_NAME} PRIVATE MyLibrary_INCLUDE_DIRS) # Example, if it exposes a variable
-
-# (Optional) Add tests using CTest
-# enable_testing()
-# add_test(NAME basic_test COMMAND ${PROJECT_NAME})
+add_custom_target(run
+  COMMAND simple
+  DEPENDS simple
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)

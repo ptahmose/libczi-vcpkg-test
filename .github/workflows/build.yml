@@ -25,3 +25,30 @@ jobs:
           git checkout libczi
           ./bootstrap-vcpkg.sh
           ./vcpkg install libczi
+
+      - name: Build test application (dynamic lib)
+        shell: bash
+        run: |
+          cd tests/simple
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release --target run
+          cd ..
+          rm -rf build
+
+      - name: Build test application (static lib)
+        shell: bash
+        run: |
+          pushd ../../vcpkg
+          ./vcpkg remove libczi --recurse
+          ./vcpkg install libczi:x64-windows-static
+          popd
+          cd tests/simple
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-windows-static 
+          cmake --build . --config Release --target run
+          cd ..
+          rm -rf build
+
