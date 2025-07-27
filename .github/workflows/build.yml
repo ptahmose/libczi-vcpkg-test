@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  test_on_windows:
     runs-on: windows-latest
 
     steps:
@@ -48,6 +48,47 @@ jobs:
           mkdir build
           cd build
           cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-windows-static 
+          cmake --build . --config Release --target run
+          cd ..
+          rm -rf build
+
+  test_on_linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: get vcpkg-clone
+        shell: bash
+        run: |
+          git clone https://github.com/ptahmose/vcpkg.git
+          cd vcpkg
+          git checkout libczi
+          ./bootstrap-vcpkg.sh
+          ./vcpkg install libczi:x64-linux-dynamic
+
+      - name: Build test application (dynamic lib)
+        shell: bash
+        run: |
+          cd tests/simple
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-linux-dynamic 
+          cmake --build . --config Release --target run
+          cd ..
+          rm -rf build
+
+      - name: Build test application (static lib)
+        shell: bash
+        run: |
+          pushd vcpkg
+          ./vcpkg remove libczi --recurse
+          ./vcpkg install libczi:x64-linux
+          popd
+          cd tests/simple
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-linux
           cmake --build . --config Release --target run
           cd ..
           rm -rf build
