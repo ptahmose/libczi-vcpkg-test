@@ -35,7 +35,7 @@ jobs:
           cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release --target run
           cd ..
-          rm -rf build
+          rd /s /q build
 
       - name: Build test application (static lib)
         shell: bash
