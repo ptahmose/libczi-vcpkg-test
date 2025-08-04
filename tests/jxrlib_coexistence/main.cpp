@@ -35,7 +35,8 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	pIE->Release(&pIE);
+	// we are leaking the PKImageEncode object here intentionally, because we seem to crash if the object is not initialized with a stream object
+	//pIE->Release(&pIE);
 
 	std::cout << "PKImageEncode created successfully." << std::endl;
 
