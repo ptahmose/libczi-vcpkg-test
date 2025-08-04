@@ -66,6 +66,22 @@ jobs:
           cd ..
           rm -rf build
 
+      - name: Build jxrlib-coexistence test application (static lib)
+        shell: bash
+        run: |
+          pushd vcpkg
+          ./vcpkg install jxrlib:x64-windows-static
+          popd
+          cd tests/jxrlib_coexistence
+          rm -rf build
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-windows-static 
+          cmake --build . --config Release --target run
+          cd ..
+          rm -rf build
+
+
   test_on_linux:
     runs-on: ubuntu-latest
 
@@ -114,6 +130,20 @@ jobs:
           ./vcpkg install pugixml:x64-linux
           popd
           cd tests/pugixml_coexistence
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-linux
+          cmake --build . --config Release --target run
+          cd ..
+          rm -rf build
+
+      - name: Build jxrlib-coexistence application (static lib)
+        shell: bash
+        run: |
+          pushd vcpkg
+          ./vcpkg install jxrlib:x64-linux
+          popd
+          cd tests/jxrlib_coexistence
           mkdir build
           cd build
           cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-linux
