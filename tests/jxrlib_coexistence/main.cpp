@@ -3,7 +3,7 @@
 
 #include <libCZI/libCZI.h>
 
-// Some trickery in needed (on Linux) to successfully include JXRGlue.h - "FAR" is used there, but this is not
+// Some trickery is needed (on Linux) to successfully include JXRGlue.h - "FAR" is used there, but this is not
 //  recognized by most compilers. Also be aware that macros for min/max are defined, and maybe there are more problematic macros.
 #pragma push_macro("FAR")
 #define FAR
