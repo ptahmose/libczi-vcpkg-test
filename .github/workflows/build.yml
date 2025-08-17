@@ -17,70 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: get vcpkg-clone
+      - name: run tests on Windows-x64
         shell: bash
         run: |
-          git clone https://github.com/ptahmose/vcpkg.git
-          cd vcpkg
-          git checkout libczi
-          ./bootstrap-vcpkg.sh
-          ./vcpkg install libczi
-
-      - name: Build test application (dynamic lib)
-        shell: bash
-        run: |
-          cd tests/simple
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --config Release --target run
-
-      - name: Build test application (static lib)
-        shell: bash
-        run: |
-          pushd vcpkg
-          ./vcpkg remove libczi --recurse
-          ./vcpkg install libczi:x64-windows-static
-          popd
-          cd tests/simple
-          rm -rf build
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-windows-static 
-          cmake --build . --config Release --target run
-          cd ..
-          rm -rf build
-
-      - name: Build pugixml-coexistence test application (static lib)
-        shell: bash
-        run: |
-          pushd vcpkg
-          ./vcpkg install pugixml:x64-windows-static
-          popd
-          cd tests/pugixml_coexistence
-          rm -rf build
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-windows-static 
-          cmake --build . --config Release --target run
-          cd ..
-          rm -rf build
-
-      - name: Build jxrlib-coexistence test application (static lib)
-        shell: bash
-        run: |
-          pushd vcpkg
-          ./vcpkg install jxrlib:x64-windows-static
-          popd
-          cd tests/jxrlib_coexistence
-          rm -rf build
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-windows-static 
-          cmake --build . --config Release --target run
-          cd ..
-          rm -rf build
-
+          bash ./run_tests.sh
 
   test_on_linux:
     runs-on: ubuntu-latest
@@ -88,66 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: get vcpkg-clone
+      - name: run tests on Linux-x64
         shell: bash
         run: |
-          git clone https://github.com/ptahmose/vcpkg.git
-          cd vcpkg
-          git checkout libczi
-          ./bootstrap-vcpkg.sh
-          ./vcpkg install libczi:x64-linux-dynamic
-
-      - name: Build test application (dynamic lib)
-        shell: bash
-        run: |
-          cd tests/simple
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-linux-dynamic 
-          cmake --build . --config Release --target run
-          cd ..
-          rm -rf build
-
-      - name: Build test application (static lib)
-        shell: bash
-        run: |
-          pushd vcpkg
-          ./vcpkg remove libczi --recurse
-          ./vcpkg install libczi:x64-linux
-          popd
-          cd tests/simple
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-linux
-          cmake --build . --config Release --target run
-          cd ..
-          rm -rf build
-
-      - name: Build pugixml-coexistence application (static lib)
-        shell: bash
-        run: |
-          pushd vcpkg
-          ./vcpkg install pugixml:x64-linux
-          popd
-          cd tests/pugixml_coexistence
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-linux
-          cmake --build . --config Release --target run
-          cd ..
-          rm -rf build
-
-      - name: Build jxrlib-coexistence application (static lib)
-        shell: bash
-        run: |
-          pushd vcpkg
-          ./vcpkg install jxrlib:x64-linux
-          popd
-          cd tests/jxrlib_coexistence
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x64-linux
-          cmake --build . --config Release --target run
-          cd ..
-          rm -rf build
-
+          bash ./run_tests.sh
