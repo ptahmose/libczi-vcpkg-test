@@ -54,7 +54,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded
 
 # Link your executable against the library provided by your port
 # Use the target alias provided by `find_package`.
-target_link_libraries(${PROJECT_NAME} PRIVATE libczi::libCZI_selected pugixml::static )
+target_link_libraries(${PROJECT_NAME} PRIVATE libczi::libCZI_selected pugixml::pugixml)
 
 add_custom_target(run
   COMMAND pugixml_coexistence
