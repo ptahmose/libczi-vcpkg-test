@@ -1,7 +1,11 @@
 .vs/
 build/
+out/
 build_static/
 tests/simple/build/
 *.o
 *.obj
 *.exe
+tests/jxrlib_coexistence/build_*
+tests/pugixml_coexistence/build_*
+vcpkg/

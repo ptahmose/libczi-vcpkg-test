@@ -31,6 +31,20 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 # --- End Vcpkg Integration ---
 
+if(MSVC AND DEFINED VCPKG_TARGET_TRIPLET)
+  cmake_policy(SET CMP0091 NEW)
+  if(VCPKG_TARGET_TRIPLET MATCHES "-static$")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+  elseif(VCPKG_TARGET_TRIPLET MATCHES "-static-md$")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+  else()
+    # default (e.g., x64-windows): dynamic CRT
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+  endif()
+   message(STATUS "**** MSVC runtime set from vcpkg: ${CMAKE_MSVC_RUNTIME_LIBRARY} ****")
+endif()
+
+
 # Find your new port.
 find_package(libCZI CONFIG REQUIRED)
 
@@ -48,9 +62,6 @@ endif()
 
 # Add your executable
 add_executable(${PROJECT_NAME} main.cpp)
-
-set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
 
 # Link your executable against the library provided by your port
 # Use the target alias provided by `find_package`.
