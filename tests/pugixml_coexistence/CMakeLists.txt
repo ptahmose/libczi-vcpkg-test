@@ -3,8 +3,7 @@
 # Specify minimum CMake version required. Vcpkg generally requires 3.14 or newer.
 cmake_minimum_required(VERSION 3.14)
 
-cmake_policy(SET CMP0091 NEW) # enable new "MSVC runtime library selection" (https://cmake.org/cmake/help/latest/variable/CMAKE_MSVC_RUNTIME_LIBRARY.html)
-
+cmake_policy(SET CMP0091 NEW)
 
 # Define your project
 project(pugixml_coexistence CXX)
@@ -31,6 +30,49 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 # --- End Vcpkg Integration ---
 
+# -------------------- vcpkg / MSVC CRT alignment --------------------
+# This block ensures your executable uses the SAME MSVC runtime (CRT)
+# as the vcpkg-built libraries for the active triplet. That avoids
+# LNK2038/LNK4098 and multiply-defined symbol/linker issues.
+
+# Preconditions:
+#  - You are on Windows with MSVC (MSVC is true).
+#  - You configured CMake with the vcpkg toolchain file so that
+#    VCPKG_TARGET_TRIPLET is defined by the toolchain.
+#  - Policy CMP0091 must be NEW so CMAKE_MSVC_RUNTIME_LIBRARY is honored.
+#
+# Recommended placement:
+#  - After `project(...)` so the vcpkg toolchain has already run,
+#    OR pass -DCMAKE_POLICY_DEFAULT_CMP0091=NEW at configure time.
+
+if(MSVC AND DEFINED VCPKG_TARGET_TRIPLET)
+  # Make sure CMake honors CMAKE_MSVC_RUNTIME_LIBRARY instead of deriving /MDd, /MD, /MTd, /MT from older vars.
+  # cmake_policy(SET CMP0091 NEW) must be set before this point, or pass -DCMAKE_POLICY_DEFAULT_CMP0091=NEW at configure time.
+
+  # Map common Windows triplets to the correct runtime:
+  #   - *-static       -> /MT (static CRT)
+  #   - *-static-md    -> /MD (dynamic CRT) even though libraries are static
+  #   - otherwise      -> /MD (dynamic CRT) e.g., x64-windows
+  if(VCPKG_TARGET_TRIPLET MATCHES "-static$")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+  elseif(VCPKG_TARGET_TRIPLET MATCHES "-static-md$")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+  else()
+    # Default (e.g., x86/x64/arm64-windows): dynamic CRT
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+  endif()
+
+  message(STATUS "**** MSVC runtime set from vcpkg triplet '${VCPKG_TARGET_TRIPLET}': ${CMAKE_MSVC_RUNTIME_LIBRARY} ****")
+
+else()
+  # Explanations to help when it doesn't trigger:
+  # - On non-Windows platforms MSVC is false, so this is expected.
+  # - If you're on Windows but don't see this message, ensure the vcpkg toolchain
+  #   is active (set CMAKE_TOOLCHAIN_FILE or VCPKG_ROOT before project()).
+  message(STATUS "vcpkg/MSVC CRT alignment block skipped (MSVC=${MSVC}, VCPKG_TARGET_TRIPLET='${VCPKG_TARGET_TRIPLET}')")
+endif()
+# ------------------ end vcpkg / MSVC CRT alignment -------------------
+
 # Find your new port.
 find_package(libCZI CONFIG REQUIRED)
 
@@ -49,12 +91,9 @@ endif()
 # Add your executable
 add_executable(${PROJECT_NAME} main.cpp)
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
-
 # Link your executable against the library provided by your port
 # Use the target alias provided by `find_package`.
-target_link_libraries(${PROJECT_NAME} PRIVATE libczi::libCZI_selected pugixml::static )
+target_link_libraries(${PROJECT_NAME} PRIVATE libczi::libCZI_selected pugixml::pugixml)
 
 add_custom_target(run
   COMMAND pugixml_coexistence
