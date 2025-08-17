@@ -40,7 +40,6 @@ TRIPLETS=()
 case "$UNAME_S" in
   MINGW*|MSYS*|CYGWIN*|Windows_NT)
     TRIPLETS=( x64-windows x64-windows-static )
-    #TRIPLETS=( x64-windows-static )
     ;;
   Linux)
     if [[ "$UNAME_M" != "x86_64" ]]; then

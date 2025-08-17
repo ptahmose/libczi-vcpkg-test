@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
 
-# Ensure CMake respects CMAKE_MSVC_RUNTIME_LIBRARY
 cmake_policy(SET CMP0091 NEW)
 
 # --- vcpkg toolchain (only if not passed via -DCMAKE_TOOLCHAIN_FILE) ---
@@ -15,44 +14,50 @@ endif()
 # ----------------------------------------------------------------------
 
 project(jxrlib_coexistence CXX)
-#message(STATUS "After project():  VCPKG_CRT_LINKAGE='${VCPKG_CRT_LINKAGE}'")
-# Now vcpkg's toolchain has run -> VCPKG_CRT_LINKAGE is defined on Windows
-#if(MSVC)
-#  if(DEFINED VCPKG_CRT_LINKAGE)
-#    if(VCPKG_CRT_LINKAGE STREQUAL "static")
-#      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-#    else()
-#      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-#    endif()
-#    message(STATUS "MSVC runtime set from vcpkg: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
-#  else()
-#    message(WARNING "VCPKG_CRT_LINKAGE not defined; default MSVC runtime will be used.")
-#    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-#  endif()
-#endif()
 
-#message(STATUS "********* VCPKG_CRT_LINKAGE: ${VCPKG_CRT_LINKAGE} *********")
 
-#if(MSVC)
-#  # Option A: derive from vcpkg triplet
-#  if(DEFINED VCPKG_CRT_LINKAGE)
-#    set(CMAKE_MSVC_RUNTIME_LIBRARY
-#        "MultiThreaded$<$<CONFIG:Debug>:Debug>$<STREQUAL:${VCPKG_CRT_LINKAGE},dynamic>:DLL>")
-#    message(STATUS "MSVC runtime set from vcpkg: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
-#  endif()
-#endif()
+# -------------------- vcpkg / MSVC CRT alignment --------------------
+# This block ensures your executable uses the SAME MSVC runtime (CRT)
+# as the vcpkg-built libraries for the active triplet. That avoids
+# LNK2038/LNK4098 and multiply-defined symbol/linker issues.
+
+# Preconditions:
+#  - You are on Windows with MSVC (MSVC is true).
+#  - You configured CMake with the vcpkg toolchain file so that
+#    VCPKG_TARGET_TRIPLET is defined by the toolchain.
+#  - Policy CMP0091 must be NEW so CMAKE_MSVC_RUNTIME_LIBRARY is honored.
+#
+# Recommended placement:
+#  - After `project(...)` so the vcpkg toolchain has already run,
+#    OR pass -DCMAKE_POLICY_DEFAULT_CMP0091=NEW at configure time.
+
 if(MSVC AND DEFINED VCPKG_TARGET_TRIPLET)
-  cmake_policy(SET CMP0091 NEW)
+  # Make sure CMake honors CMAKE_MSVC_RUNTIME_LIBRARY instead of deriving /MDd, /MD, /MTd, /MT from older vars.
+  # cmake_policy(SET CMP0091 NEW) must be set before this point, or pass -DCMAKE_POLICY_DEFAULT_CMP0091=NEW at configure time.
+
+  # Map common Windows triplets to the correct runtime:
+  #   - *-static       -> /MT (static CRT)
+  #   - *-static-md    -> /MD (dynamic CRT) even though libraries are static
+  #   - otherwise      -> /MD (dynamic CRT) e.g., x64-windows
   if(VCPKG_TARGET_TRIPLET MATCHES "-static$")
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   elseif(VCPKG_TARGET_TRIPLET MATCHES "-static-md$")
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
   else()
-    # default (e.g., x64-windows): dynamic CRT
+    # Default (e.g., x86/x64/arm64-windows): dynamic CRT
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
   endif()
-   message(STATUS "**** MSVC runtime set from vcpkg: ${CMAKE_MSVC_RUNTIME_LIBRARY} ****")
+
+  message(STATUS "**** MSVC runtime set from vcpkg triplet '${VCPKG_TARGET_TRIPLET}': ${CMAKE_MSVC_RUNTIME_LIBRARY} ****")
+
+else()
+  # Explanations to help when it doesn't trigger:
+  # - On non-Windows platforms MSVC is false, so this is expected.
+  # - If you're on Windows but don't see this message, ensure the vcpkg toolchain
+  #   is active (set CMAKE_TOOLCHAIN_FILE or VCPKG_ROOT before project()).
+  message(STATUS "vcpkg/MSVC CRT alignment block skipped (MSVC=${MSVC}, VCPKG_TARGET_TRIPLET='${VCPKG_TARGET_TRIPLET}')")
 endif()
+# ------------------ end vcpkg / MSVC CRT alignment -------------------
 
 
 set(CMAKE_CXX_STANDARD 17)
@@ -74,8 +79,6 @@ endif()
 add_executable(${PROJECT_NAME} main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${JXR_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE libczi::libCZI_selected ${JXR_LIBRARIES})
-
-message(STATUS "JXR_LIBRARIES: ${JXR_LIBRARIES}")
 
 add_custom_target(run
   COMMAND jxrlib_coexistence
