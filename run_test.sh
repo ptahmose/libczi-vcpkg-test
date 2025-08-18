@@ -10,6 +10,9 @@ test_script_name="${test_script_name:-execute_test.sh}"
 TEST_DIRS=(
   "tests/pugixml_coexistence"
   "tests/jxrlib_coexistence"
+  "tests/azuresdk_test"
+  "tests/curl_test"
+  "tests/azuresdk_and_curl_test"c
   # "tests/another_test"
 )
 # ------------------------
@@ -32,8 +35,11 @@ if [[ -e "$vcpkg_target_dir" ]]; then
   rm -rf -- "$vcpkg_target_dir"
 fi
 
-git clone --depth 1 --single-branch --branch master --filter=blob:none \
-  https://github.com/microsoft/vcpkg.git "$vcpkg_target_dir"
+#git clone --depth 1 --single-branch --branch master --filter=blob:none \
+#  https://github.com/microsoft/vcpkg.git "$vcpkg_target_dir"
+git clone --depth 1 --single-branch --branch jbl/add_vcpkg_options2 --filter=blob:none \
+  https://github.com/ptahmose/vcpkg "$vcpkg_target_dir"
+
 
 # Bootstrap vcpkg (Linux/macOS or Windows bash)
 bootstrap_vcpkg() {

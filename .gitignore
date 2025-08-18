@@ -8,4 +8,7 @@ tests/simple/build/
 *.exe
 tests/jxrlib_coexistence/build_*
 tests/pugixml_coexistence/build_*
+tests/azuresdk_and_curl_test/build_*
+tests/azuresdk_test/build_*
+tests/curl_test/build_*
 vcpkg/
