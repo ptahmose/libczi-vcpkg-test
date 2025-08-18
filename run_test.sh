@@ -12,7 +12,7 @@ TEST_DIRS=(
   "tests/jxrlib_coexistence"
   "tests/azuresdk_test"
   "tests/curl_test"
-  "tests/azuresdk_and_curl_test"c
+  "tests/azuresdk_and_curl_test"
   # "tests/another_test"
 )
 # ------------------------
