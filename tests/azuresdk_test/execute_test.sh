@@ -41,7 +41,15 @@ if [[ -z "$TRIPLET_LIST" ]]; then
   echo "Error: No supported vcpkg triplets found for this platform in '$VCPKG_DIR_ABS'." >&2
   exit 1
 fi
-mapfile -t TRIPLETS <<< "$TRIPLET_LIST"
+# Portable array fill: use mapfile if present, otherwise read loop (macOS Bash 3.2)
+TRIPLETS=()
+if command -v mapfile >/dev/null 2>&1; then
+  mapfile -t TRIPLETS <<< "$TRIPLET_LIST"
+else
+  while IFS= read -r t; do
+    [[ -n "$t" ]] && TRIPLETS+=("$t")
+  done <<< "$TRIPLET_LIST"
+fi
 
 # Use this vcpkg
 export VCPKG_ROOT="$VCPKG_DIR_ABS"
