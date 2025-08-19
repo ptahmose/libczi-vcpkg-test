@@ -49,6 +49,12 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: alpine:latest
+    env:
+      CC: gcc
+      CXX: g++
+      CMAKE_GENERATOR: Ninja
+      VCPKG_FORCE_SYSTEM_BINARIES: 1
+      VCPKG_DEFAULT_TRIPLET: x64-linux-musl   # <- important for musl
     steps:
       - name: Install toolchain & deps for vcpkg/CMake
         run: |
@@ -56,6 +62,8 @@ jobs:
           apk add --no-cache \
             bash git curl zip unzip tar ca-certificates \
             build-base pkgconf cmake ninja linux-headers
+          # sanity
+          gcc --version; g++ --version; cmake --version; ninja --version
 
       # checkout AFTER git is installed in the container
       - uses: actions/checkout@v4
