@@ -44,3 +44,34 @@ jobs:
         shell: bash
         run: |
           bash ./run_test.sh
+
+  test_on_linux_qemu:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: aarch64
+            distro: ubuntu22.04
+            name: linux-arm64
+          - arch: riscv64
+            distro: ubuntu22.04
+            name: linux-riscv64
+    name: Run tests on ${{ matrix.name }} (QEMU)
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run on ${{ matrix.name }}
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          dockerRunArgs: |
+            --volume "${{ github.workspace }}:/workspace"
+            --workdir /workspace
+          install: |
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y \
+              git curl zip unzip tar ca-certificates \
+              build-essential pkg-config cmake ninja-build
+          run: |
+            bash ./run_test.sh
