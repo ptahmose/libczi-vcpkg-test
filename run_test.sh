@@ -35,10 +35,10 @@ if [[ -e "$vcpkg_target_dir" ]]; then
   rm -rf -- "$vcpkg_target_dir"
 fi
 
-#git clone --depth 1 --single-branch --branch master --filter=blob:none \
-#  https://github.com/microsoft/vcpkg.git "$vcpkg_target_dir"
-git clone --depth 1 --single-branch --branch jbl/add_vcpkg_options --filter=blob:none \
-  https://github.com/ptahmose/vcpkg "$vcpkg_target_dir"
+git clone --depth 1 --single-branch --branch master --filter=blob:none \
+  https://github.com/microsoft/vcpkg.git "$vcpkg_target_dir"
+#git clone --depth 1 --single-branch --branch jbl/add_vcpkg_options --filter=blob:none \
+#  https://github.com/ptahmose/vcpkg "$vcpkg_target_dir"
 
 
 # Bootstrap vcpkg (Linux/macOS or Windows bash)
