@@ -32,3 +32,15 @@ jobs:
         shell: bash
         run: |
           bash ./run_test.sh
+
+  test_on_macos:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-13, macos-14]  # Intel + Apple Silicon
+    steps:
+      - uses: actions/checkout@v4
+      - name: run tests on ${{ matrix.os }}
+        shell: bash
+        run: |
+          bash ./run_test.sh
