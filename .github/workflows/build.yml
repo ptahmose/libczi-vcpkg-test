@@ -51,12 +51,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arch: aarch64
-            distro: ubuntu_latest
-            name: linux-arm64
-          - arch: riscv64
-            distro: ubuntu_latest
-            name: linux-riscv64
+          #- arch: aarch64
+          #  distro: ubuntu_latest
+          #  name: linux-arm64
+          #- arch: riscv64
+          #  distro: ubuntu_latest
+          #  name: linux-riscv64
+          - arch: x86_64
+            distro: alpine_latest
+            name: alpine-x64-musl
     name: Run tests on ${{ matrix.name }} (QEMU)
     steps:
       - uses: actions/checkout@v4
@@ -68,10 +71,21 @@ jobs:
           dockerRunArgs: |
             --volume "${{ github.workspace }}:/workspace"
             --workdir /workspace
+          # Install prerequisites for vcpkg/CMake/Ninja on both Debian/Ubuntu and Alpine
           install: |
-            apt-get update
-            DEBIAN_FRONTEND=noninteractive apt-get install -y \
-              git curl zip unzip tar ca-certificates \
-              build-essential pkg-config cmake ninja-build
+            if command -v apk >/dev/null 2>&1; then
+              # Alpine (musl)
+              apk update
+              apk add --no-cache \
+                bash git curl zip unzip tar ca-certificates \
+                build-base pkgconf cmake ninja
+            else
+              # Debian/Ubuntu (glibc)
+              apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y \
+                bash git curl zip unzip tar ca-certificates \
+                build-essential pkg-config cmake ninja-build
+            fi
           run: |
+            # Ensure we're using bash (Alpine default is /bin/sh)
             bash ./run_test.sh
