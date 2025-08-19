@@ -75,15 +75,30 @@ vcpkg_detect_triplets() {
     Darwin)
       # macOS (Intel/Apple Silicon)
       if [[ "$arch" == "arm64" ]]; then
-        mapfile -t out < <(
-          vcpkg_add_if_exists "$root" arm64-osx
-          vcpkg_add_if_exists "$root" arm64-osx-dynamic
-        )
+        if ! command -v mapfile &> /dev/null; then
+          # Provide a fallback for mapfile if not available (e.g., on macOS older bash versions)
+          out=($(
+            vcpkg_add_if_exists "$root" arm64-osx
+            vcpkg_add_if_exists "$root" arm64-osx-dynamic
+          ))
+        else
+          mapfile -t out < <(
+            vcpkg_add_if_exists "$root" arm64-osx
+            vcpkg_add_if_exists "$root" arm64-osx-dynamic
+          )
+        fi
       else
-        mapfile -t out < <(
-          vcpkg_add_if_exists "$root" x64-osx
-          vcpkg_add_if_exists "$root" x64-osx-dynamic
-        )
+        if ! command -v mapfile &> /dev/null; then
+          out=($(
+            vcpkg_add_if_exists "$root" x64-osx
+            vcpkg_add_if_exists "$root" x64-osx-dynamic
+          ))
+        else
+          mapfile -t out < <(
+            vcpkg_add_if_exists "$root" x64-osx
+            vcpkg_add_if_exists "$root" x64-osx-dynamic
+          )
+        fi
       fi
       ;;
 
