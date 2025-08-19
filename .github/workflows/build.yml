@@ -52,10 +52,10 @@ jobs:
       matrix:
         include:
           - arch: aarch64
-            distro: ubuntu22.04
+            distro: ubuntu_latest
             name: linux-arm64
           - arch: riscv64
-            distro: ubuntu22.04
+            distro: ubuntu_latest
             name: linux-riscv64
     name: Run tests on ${{ matrix.name }} (QEMU)
     steps:
