@@ -33,26 +33,15 @@ if [[ ! -f "CMakeLists.txt" ]]; then
 fi
 
 # Detect platform -> triplets
-UNAME_S="$(uname -s)"
-UNAME_M="$(uname -m)"
-TRIPLETS=()
-
-case "$UNAME_S" in
-  MINGW*|MSYS*|CYGWIN*|Windows_NT)
-    TRIPLETS=( x64-windows x64-windows-static )
-    ;;
-  Linux)
-    if [[ "$UNAME_M" != "x86_64" ]]; then
-      echo "Error: This script expects Linux x86_64. Detected arch: $UNAME_M"
-      exit 1
-    fi
-    TRIPLETS=( x64-linux x64-linux-dynamic )
-    ;;
-  *)
-    echo "Error: Unsupported OS: $UNAME_S"
-    exit 1
-    ;;
-esac
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+source "$SCRIPT_DIR/../vcpkg-triplets.sh"
+declare -F vcpkg_detect_triplets || { echo "Function not loaded"; exit 1; }
+TRIPLET_LIST="$(vcpkg_detect_triplets "$VCPKG_DIR_ABS")"
+if [[ -z "$TRIPLET_LIST" ]]; then
+  echo "Error: No supported vcpkg triplets found for this platform in '$VCPKG_DIR_ABS'." >&2
+  exit 1
+fi
+mapfile -t TRIPLETS <<< "$TRIPLET_LIST"
 
 # Use this vcpkg
 export VCPKG_ROOT="$VCPKG_DIR_ABS"
