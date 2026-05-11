@@ -37,7 +37,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13, macos-14]  # Intel + Apple Silicon
+        os: [macos-14,macOS-15,macOS-15-arm64]  # Intel + Apple Silicon
     steps:
       - uses: actions/checkout@v4
       - name: run tests on ${{ matrix.os }}
